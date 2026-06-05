@@ -14,6 +14,7 @@ function PlayerView() {
   const [gameOver, setGameOver] = useState(false);
   const [winners, setWinners] = useState([]);
   const [myName, setMyName] = useState('');
+  const [reviveNotification, setReviveNotification] = useState(false);
 
   useEffect(() => {
     socket.on('joined_success', (data) => {
@@ -31,6 +32,7 @@ function PlayerView() {
     socket.on('you_are_dead', () => {
       setStep('dead');
       setFeedback(null);
+      setCurrentQuestion(null);
     });
 
     socket.on('revival_locked_status', ({ isLocked }) => {
@@ -52,7 +54,8 @@ function PlayerView() {
     socket.on('you_are_revived', () => {
       setStep('alive');
       setStreak(0);
-      alert('Tuyệt vời! Bạn đã được HỒI SINH!');
+      setReviveNotification(true);
+      setTimeout(() => setReviveNotification(false), 3000);
     });
 
     socket.on('answer_submitted_anonymous', () => {
@@ -215,6 +218,11 @@ function PlayerView() {
               <div style={{ textAlign: 'center', padding: '50px 20px', color: '#555' }}>
                 <h3>Đang chờ Host bắt đầu trò chơi...</h3>
               </div>
+            ) : step === 'dead' && !currentQuestion ? (
+               <div style={{ textAlign: 'center', padding: '50px 20px', color: '#f44336' }}>
+                  <h3>💀 BẠN ĐÃ BỊ LOẠI</h3>
+                  {isRevivalLocked ? <p>Vòng Chung Kết - Không có hồi sinh</p> : <p>Chờ câu sau để Hồi sinh!</p>}
+               </div>
             ) : !currentQuestion ? (
                <div style={{ textAlign: 'center', padding: '50px 20px', color: '#555' }}>
                   <h3>Đang chờ câu hỏi tiếp theo...</h3>
@@ -282,6 +290,11 @@ function PlayerView() {
         </div>
       </div>
       </div>
+      {reviveNotification && (
+        <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', background: '#4CAF50', color: 'white', padding: '15px 30px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 1000, fontWeight: 'bold', fontSize: '18px' }}>
+          Tuyệt vời! Bạn đã được HỒI SINH! 🎉
+        </div>
+      )}
     </>
   );
 }
