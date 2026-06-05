@@ -214,7 +214,30 @@ function HostView() {
               <div className="question-main-auto">
                 <div className="title-question">Câu {currentQuestionIndex + 1}: {currentQ?.text}</div>
                 {timeLeft === 0 && (
-                  <h4 style={{ color: '#4CAF50', textAlign: 'center', marginTop: '10px' }}>Đáp án đúng: {currentQ?.answer}</h4>
+                  <div style={{ background: 'white', border: '1px solid #eaeaea', borderRadius: '16px', padding: '40px 20px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', maxWidth: '400px', margin: '20px auto 0 auto' }}>
+                    <p style={{ fontSize: '15px', color: '#6b7280', fontWeight: 'bold', marginBottom: '25px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Đáp án đúng
+                    </p>
+                    {currentQ?.answer === 'True' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <div style={{ width: '56px', height: '56px', background: '#e6f4ea', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 0 8px rgba(76,175,80,0.1)' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13L9 17L19 7" stroke="#1e8e3e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e8e3e' }}>Đúng (True)</span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <div style={{ width: '56px', height: '56px', background: '#fce8e6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 0 8px rgba(244,67,54,0.1)' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="#d93025" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#d93025' }}>Sai (False)</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
