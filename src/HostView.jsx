@@ -149,27 +149,27 @@ function HostView() {
         
         <div className="question-data">
           <p className="time-data">00:<span id="runing-data">{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span></p>
-          <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
-            <div className="data-design-main" style={{ flex: 1, margin: 0 }}>
-              <div className="question-change-number" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p>Trạng thái: <span className="changing" style={{ color: isRevivalLocked ? '#f44336' : '#4CAF50' }}>{isRevivalLocked ? 'VÒNG CHUNG KẾT' : 'VÒNG LOẠI'}</span></p>
-              </div>
-              <div className="steps" style={{ display: 'block' }}>
-                <div className="question-main-auto">
-                  <div className="title-question">Câu {currentQuestionIndex + 1}: {currentQ?.text}</div>
-                  {timeLeft === 0 && (
-                    <h4 style={{ color: '#4CAF50', textAlign: 'center', marginTop: '10px' }}>Đáp án đúng: {currentQ?.answer}</h4>
-                  )}
-                </div>
-              </div>
-              <div className="button-deta-design">
-                <button className="next-data" id="next" onClick={handleNextQuestion}>
-                  Chuyển câu tiếp theo
-                </button>
+          <div className="data-design-main">
+            <div className="question-change-number" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p>Trạng thái: <span className="changing" style={{ color: isRevivalLocked ? '#f44336' : '#4CAF50' }}>{isRevivalLocked ? 'VÒNG CHUNG KẾT' : 'VÒNG LOẠI'}</span></p>
+            </div>
+            <div className="steps" style={{ display: 'block' }}>
+              <div className="question-main-auto">
+                <div className="title-question">Câu {currentQuestionIndex + 1}: {currentQ?.text}</div>
+                {timeLeft === 0 && (
+                  <h4 style={{ color: '#4CAF50', textAlign: 'center', marginTop: '10px' }}>Đáp án đúng: {currentQ?.answer}</h4>
+                )}
               </div>
             </div>
+            <div className="button-deta-design">
+              <button className="next-data" id="next" onClick={handleNextQuestion}>
+                Chuyển câu tiếp theo
+              </button>
+            </div>
+          </div>
 
-            <div style={{ width: '380px', background: 'white', borderRadius: '20px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+          {/* RIGHT FLOATING PLAYER LIST */}
+          <div style={{ position: 'absolute', right: '50px', top: '150px', width: '350px', background: 'rgba(255, 255, 255, 0.95)', borderRadius: '20px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', zIndex: 100, backdropFilter: 'blur(10px)' }}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', marginBottom: '20px', fontWeight: 'bold' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M16 11C18.2091 11 20 9.20914 20 7C20 4.79086 18.2091 3 16 3C13.7909 3 12 4.79086 12 7C12 9.20914 13.7909 11 16 11Z" fill="#1f2937"/>
@@ -202,7 +202,6 @@ function HostView() {
                 ))}
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
