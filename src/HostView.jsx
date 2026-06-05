@@ -149,57 +149,58 @@ function HostView() {
         
         <div className="question-data">
           <p className="time-data">00:<span id="runing-data">{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span></p>
-          <div className="data-design-main">
-            <div className="question-change-number" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p>Trạng thái: <span className="changing" style={{ color: isRevivalLocked ? '#f44336' : '#4CAF50' }}>{isRevivalLocked ? 'VÒNG CHUNG KẾT' : 'VÒNG LOẠI'}</span></p>
-            </div>
-            <div className="steps" style={{ display: 'block' }}>
-              <div className="question-main-auto">
-                <div className="title-question">Câu {currentQuestionIndex + 1}: {currentQ?.text}</div>
-                {timeLeft === 0 && (
-                  <h4 style={{ color: '#4CAF50', textAlign: 'center', marginTop: '10px' }}>Đáp án đúng: {currentQ?.answer}</h4>
-                )}
+          <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
+            <div className="data-design-main" style={{ flex: 1, margin: 0 }}>
+              <div className="question-change-number" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p>Trạng thái: <span className="changing" style={{ color: isRevivalLocked ? '#f44336' : '#4CAF50' }}>{isRevivalLocked ? 'VÒNG CHUNG KẾT' : 'VÒNG LOẠI'}</span></p>
               </div>
-              
-              <div style={{ padding: '20px' }}>
-                <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>Danh sách Người chơi</h3>
-                <div className="row">
-                  {players.map(p => (
-                    <div className="col-lg-6 col-md-6 col-12" key={p.id} style={{ marginBottom: '15px' }}>
-                      <div 
-                        className="option-selected" 
-                        style={{ 
-                          background: p.status === 'Alive' ? '#4CAF50' : '#f44336',
-                          color: 'white',
-                          border: 'none',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <div>
-                          <strong>{p.name}</strong> - {p.status}
-                          {isRevivalLocked && p.lastAnswer && <span style={{ marginLeft: '10px', fontSize: '0.8em', background: 'rgba(0,0,0,0.3)', padding: '2px 8px', borderRadius: '10px' }}>Đã nộp bài</span>}
-                        </div>
-                        {p.status === 'Alive' && !isRevivalLocked && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); killPlayer(p.id); }} 
-                            style={{ padding: '5px 15px', background: '#000', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-                          >
-                            Kill
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+              <div className="steps" style={{ display: 'block' }}>
+                <div className="question-main-auto">
+                  <div className="title-question">Câu {currentQuestionIndex + 1}: {currentQ?.text}</div>
+                  {timeLeft === 0 && (
+                    <h4 style={{ color: '#4CAF50', textAlign: 'center', marginTop: '10px' }}>Đáp án đúng: {currentQ?.answer}</h4>
+                  )}
                 </div>
               </div>
-
+              <div className="button-deta-design">
+                <button className="next-data" id="next" onClick={handleNextQuestion}>
+                  Chuyển câu tiếp theo
+                </button>
+              </div>
             </div>
-            <div className="button-deta-design">
-              <button className="next-data" id="next" onClick={handleNextQuestion}>
-                Chuyển câu tiếp theo
-              </button>
+
+            <div style={{ width: '380px', background: 'white', borderRadius: '20px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', marginBottom: '20px', fontWeight: 'bold' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 11C18.2091 11 20 9.20914 20 7C20 4.79086 18.2091 3 16 3C13.7909 3 12 4.79086 12 7C12 9.20914 13.7909 11 16 11Z" fill="#1f2937"/>
+                  <path d="M16 13C12.6863 13 10 15.6863 10 19V21H22V19C22 15.6863 19.3137 13 16 13Z" fill="#1f2937"/>
+                  <path d="M8 11C9.65685 11 11 9.65685 11 8C11 6.34315 9.65685 5 8 5C6.34315 5 5 6.34315 5 8C5 9.65685 6.34315 11 8 11Z" fill="#9ca3af"/>
+                  <path d="M8 13C5.79086 13 4 14.7908 4 17V19H8V18.1C8 16.7112 8.44149 15.4243 9.19163 14.3736C8.82512 14.1352 8.42398 13.9431 8 13.8247V13Z" fill="#9ca3af"/>
+                </svg>
+                Player List
+              </h3>
+              <div style={{ maxHeight: '500px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {players.map(p => (
+                  <div key={p.id} style={{ border: '1px solid #eaeaea', borderRadius: '15px', padding: '12px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${p.name}`} alt="avatar" style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#f5f7f9' }} />
+                      <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#333' }}>{p.name}</div>
+                        <div style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.status === 'Alive' ? '#4CAF50' : '#f44336', display: 'inline-block' }}></span>
+                          {p.status}
+                          {isRevivalLocked && p.lastAnswer && <span style={{ color: '#2196F3', fontSize: '11px', fontWeight: 'bold' }}>(Đã nộp)</span>}
+                        </div>
+                      </div>
+                    </div>
+                    {p.status === 'Alive' && !isRevivalLocked && (
+                      <button onClick={(e) => { e.stopPropagation(); killPlayer(p.id); }} style={{ background: '#f44336', color: 'white', border: 'none', padding: '6px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', transition: '0.2s' }}>
+                        Kill
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
