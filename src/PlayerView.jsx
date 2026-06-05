@@ -210,7 +210,7 @@ function PlayerView() {
               ) : step === 'alive' ? (
                 <p>Trạng Thái: <span className="changing" style={{ color: '#4CAF50' }}>BẠN ĐANG SỐNG</span></p>
               ) : (
-                <p>Trạng Thái: <span className="changing" style={{ color: '#f44336' }}>ĐÃ CHẾT</span> | Trả lời nhanh nhất để Hồi sinh!</p>
+                <p>Trạng Thái: <span className="changing" style={{ color: '#f44336' }}>ĐÃ CHẾT</span> | {currentQuestion ? 'Trả lời nhanh nhất để Hồi sinh!' : 'Chờ câu tiếp theo'}</p>
               )}
             </div>
             
