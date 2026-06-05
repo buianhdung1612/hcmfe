@@ -90,7 +90,7 @@ function HostView() {
       <>
         <div className="data-design-svg">
           <div className="right-tree">
-            <img src="/assets/images/hero/image-main/Mask.svg" alt="tree-right" />
+            <img src="https://i.ibb.co/qYxZtRj2/Mask.jpg" alt="tree-right" />
           </div>
         </div>
         <div className="fixed-first-page" style={{ display: 'block' }}>
