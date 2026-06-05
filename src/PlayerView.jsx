@@ -249,10 +249,39 @@ function PlayerView() {
 
                 ) : feedback ? (
                   /* Hiện kết quả */
-                  <div style={{ padding: '30px', textAlign: 'center', borderRadius: '15px', border: `2px solid ${feedback === 'correct' ? '#4CAF50' : '#f44336'}` }}>
-                    <h2 style={{ color: feedback === 'correct' ? '#4CAF50' : '#f44336' }}>
-                      {feedback === 'correct' ? '✅ CHÍNH XÁC!' : feedback === 'wrong' ? '❌ SAI RỒI!' : '⏰ HẾT GIỜ!'}
-                    </h2>
+                  <div style={{ background: 'white', border: '1px solid #eaeaea', borderRadius: '16px', padding: '40px 20px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', maxWidth: '400px', margin: '0 auto' }}>
+                    <p style={{ fontSize: '15px', color: '#6b7280', fontWeight: 'bold', marginBottom: '25px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {feedback === 'timeout' ? 'Hết giờ' : feedback === 'correct' ? 'Đáp án đúng' : 'Đáp án sai'}
+                    </p>
+                    {feedback === 'correct' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <div style={{ width: '56px', height: '56px', background: '#e6f4ea', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 0 8px rgba(76,175,80,0.1)' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13L9 17L19 7" stroke="#1e8e3e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e8e3e' }}>Đúng ({selectedAnswer})</span>
+                      </div>
+                    ) : feedback === 'wrong' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <div style={{ width: '56px', height: '56px', background: '#fce8e6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 0 8px rgba(244,67,54,0.1)' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="#d93025" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#d93025' }}>Sai ({selectedAnswer})</span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <div style={{ width: '56px', height: '56px', background: '#fef7e0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 0 8px rgba(249,171,0,0.1)' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="#f9ab00" strokeWidth="3"/>
+                            <path d="M12 7V12L15 15" stroke="#f9ab00" strokeWidth="3" strokeLinecap="round"/>
+                          </svg>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#f9ab00' }}>Hết giờ!</span>
+                      </div>
+                    )}
                   </div>
 
                 ) : (

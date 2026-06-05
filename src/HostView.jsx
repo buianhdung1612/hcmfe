@@ -166,7 +166,7 @@ function HostView() {
                 <p className="fixed-desc">Danh sách chờ: {players.length} người</p>
                 <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   {players.map(p => (
-                    <span key={p.id} style={{ background: 'rgba(255,255,255,0.2)', padding: '5px 15px', borderRadius: '20px', color: 'white', fontWeight: 'bold' }}>
+                    <span key={p.id} style={{ background: '#e0e7ff', padding: '5px 15px', borderRadius: '20px', color: '#4f46e5', fontWeight: 'bold' }}>
                       {p.name}
                     </span>
                   ))}
