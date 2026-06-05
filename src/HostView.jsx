@@ -90,7 +90,7 @@ function HostView() {
       <>
         <div className="data-design-svg">
           <div className="right-tree">
-            <img src="https://i.ibb.co/qYxZtRj2/Mask.jpg" alt="tree-right" />
+            <img src="/assets/images/hero/image-main/Mask.svg" alt="tree-right" />
           </div>
         </div>
         <div className="fixed-first-page" style={{ display: 'block' }}>
@@ -125,7 +125,13 @@ function HostView() {
   const currentQ = questions[currentQuestionIndex];
 
   return (
-    <div className="main" style={{ display: 'block' }}>
+    <>
+      <div className="data-design-svg">
+        <div className="right-tree">
+          <img src="/assets/images/hero/image-main/Mask.svg" alt="tree-right" />
+        </div>
+      </div>
+      <div className="main" style={{ display: 'block' }}>
       <div className="quiz-time" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
         <span>HOST CONTROL</span>
         <button onClick={toggleRevivalLock} style={{ padding: '8px 15px', background: isRevivalLocked ? '#4CAF50' : '#f44336', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
@@ -199,6 +205,7 @@ function HostView() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

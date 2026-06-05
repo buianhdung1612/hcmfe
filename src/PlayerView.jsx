@@ -153,7 +153,13 @@ function PlayerView() {
 
   // DEAD VIEW or FINAL ROUND (isRevivalLocked)
   return (
-    <div className="main" style={{ display: 'block' }}>
+    <>
+      <div className="data-design-svg">
+        <div className="right-tree">
+          <img src="/assets/images/hero/image-main/Mask.svg" alt="tree-right" />
+        </div>
+      </div>
+      <div className="main" style={{ display: 'block' }}>
       <div className="quiz-time">QUIZ TIME</div>
       <div className="container">
         <div className="header-data">
@@ -228,7 +234,8 @@ function PlayerView() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
