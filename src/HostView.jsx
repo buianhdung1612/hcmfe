@@ -132,12 +132,7 @@ function HostView() {
         </div>
       </div>
       <div className="main" style={{ display: 'block' }}>
-      <div className="quiz-time" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
-        <span>HOST CONTROL</span>
-        <button onClick={toggleRevivalLock} style={{ padding: '8px 15px', background: isRevivalLocked ? '#4CAF50' : '#f44336', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-          {isRevivalLocked ? 'Mở lại Hồi sinh' : 'Kích hoạt Vòng Chung Kết'}
-        </button>
-      </div>
+      <div className="quiz-time">HOST CONTROL</div>
       <div className="container">
         <div className="header-data">
           <div className="logo-design">
@@ -150,8 +145,8 @@ function HostView() {
         <div className="question-data">
           <p className="time-data">00:<span id="runing-data">{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span></p>
           <div className="data-design-main">
-            <div className="question-change-number" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p>Trạng thái: <span className="changing" style={{ color: isRevivalLocked ? '#f44336' : '#4CAF50' }}>{isRevivalLocked ? 'VÒNG CHUNG KẾT' : 'VÒNG LOẠI'}</span></p>
+            <div className="question-change-number">
+              <p>Câu hỏi: <span className="changing">{currentQuestionIndex + 1 < 10 ? `0${currentQuestionIndex + 1}` : currentQuestionIndex + 1}</span> out of {questions.length < 10 ? `0${questions.length}` : questions.length}</p>
             </div>
             <div className="steps" style={{ display: 'block' }}>
               <div className="question-main-auto">
@@ -168,18 +163,72 @@ function HostView() {
             </div>
           </div>
 
-          {/* RIGHT FLOATING PLAYER LIST */}
-          <div style={{ position: 'absolute', right: '50px', top: '150px', width: '350px', background: 'rgba(255, 255, 255, 0.95)', borderRadius: '20px', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', zIndex: 100, backdropFilter: 'blur(10px)' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', marginBottom: '20px', fontWeight: 'bold' }}>
+          {/* RIGHT FLOATING SIDEBAR */}
+          <div style={{ position: 'fixed', right: '20px', top: '20px', bottom: '20px', width: '380px', background: 'rgba(255, 255, 255, 0.95)', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', backdropFilter: 'blur(10px)' }}>
+            
+            {/* Stage Management */}
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '15px', margin: 0 }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 11C18.2091 11 20 9.20914 20 7C20 4.79086 18.2091 3 16 3C13.7909 3 12 4.79086 12 7C12 9.20914 13.7909 11 16 11Z" fill="#1f2937"/>
-                  <path d="M16 13C12.6863 13 10 15.6863 10 19V21H22V19C22 15.6863 19.3137 13 16 13Z" fill="#1f2937"/>
-                  <path d="M8 11C9.65685 11 11 9.65685 11 8C11 6.34315 9.65685 5 8 5C6.34315 5 5 6.34315 5 8C5 9.65685 6.34315 11 8 11Z" fill="#9ca3af"/>
-                  <path d="M8 13C5.79086 13 4 14.7908 4 17V19H8V18.1C8 16.7112 8.44149 15.4243 9.19163 14.3736C8.82512 14.1352 8.42398 13.9431 8 13.8247V13Z" fill="#9ca3af"/>
+                  <path d="M4 2V22M4 4H15C16.1046 4 17 4.89543 17 6C17 7.10457 16.1046 8 15 8H4M15 8L18 10L15 12V8Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Player List
+                Stage Management
               </h3>
-              <div style={{ maxHeight: '500px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                <div style={{ flex: 1, border: isRevivalLocked ? '1px solid #e5e7eb' : '2px solid #3b82f6', background: isRevivalLocked ? '#f9fafb' : '#eff6ff', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: isRevivalLocked ? '#6b7280' : '#1f2937', fontSize: '14px' }}>
+                    {isRevivalLocked ? <span style={{ color: '#10b981' }}>✔</span> : <span style={{ width: '16px', height: '16px', background: '#3b82f6', borderRadius: '50%', color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✔</span>} 
+                    Qualifying Round
+                  </div>
+                  <div style={{ marginTop: '8px' }}>
+                    <span style={{ fontSize: '12px', border: isRevivalLocked ? '1px solid #10b981' : 'none', background: isRevivalLocked ? '#d1fae5' : 'transparent', color: isRevivalLocked ? '#059669' : 'transparent', padding: '2px 8px', borderRadius: '4px' }}>
+                      {isRevivalLocked ? 'Completed' : ''}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, border: isRevivalLocked ? '2px solid #3b82f6' : '1px solid #e5e7eb', background: isRevivalLocked ? '#eff6ff' : '#f9fafb', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: isRevivalLocked ? '#1f2937' : '#6b7280', fontSize: '14px' }}>
+                    {isRevivalLocked ? <span style={{ width: '16px', height: '16px', background: '#3b82f6', borderRadius: '50%', color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✔</span> : <span>🔒</span>}
+                    Final Round
+                  </div>
+                  <div style={{ marginTop: '8px' }}>
+                    <span style={{ fontSize: '12px', background: isRevivalLocked ? 'transparent' : '#f3f4f6', border: isRevivalLocked ? 'none' : '1px solid #d1d5db', color: isRevivalLocked ? 'transparent' : '#6b7280', padding: '2px 8px', borderRadius: '4px' }}>
+                      {isRevivalLocked ? '' : 'Locked'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={toggleRevivalLock} 
+                style={{ width: '100%', padding: '12px', background: isRevivalLocked ? '#4b5563' : '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: '0.2s' }}
+              >
+                {isRevivalLocked ? 'Deactivate Final Round' : '▶ Activate Final Round'}
+              </button>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '0' }} />
+
+            {/* Player List */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 11C18.2091 11 20 9.20914 20 7C20 4.79086 18.2091 3 16 3C13.7909 3 12 4.79086 12 7C12 9.20914 13.7909 11 16 11Z" fill="#1f2937"/>
+                    <path d="M16 13C12.6863 13 10 15.6863 10 19V21H22V19C22 15.6863 19.3137 13 16 13Z" fill="#1f2937"/>
+                    <path d="M8 11C9.65685 11 11 9.65685 11 8C11 6.34315 9.65685 5 8 5C6.34315 5 5 6.34315 5 8C5 9.65685 6.34315 11 8 11Z" fill="#9ca3af"/>
+                    <path d="M8 13C5.79086 13 4 14.7908 4 17V19H8V18.1C8 16.7112 8.44149 15.4243 9.19163 14.3736C8.82512 14.1352 8.42398 13.9431 8 13.8247V13Z" fill="#9ca3af"/>
+                  </svg>
+                  Player List
+                </h3>
+                <span style={{ fontSize: '12px', background: '#f3f4f6', color: '#4b5563', padding: '4px 10px', borderRadius: '20px', fontWeight: 'bold' }}>
+                  {players.length < 10 ? `0${players.length}` : players.length} Players
+                </span>
+              </div>
+              
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '5px' }}>
                 {players.map(p => (
                   <div key={p.id} style={{ border: '1px solid #eaeaea', borderRadius: '15px', padding: '12px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -202,6 +251,7 @@ function HostView() {
                 ))}
               </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
