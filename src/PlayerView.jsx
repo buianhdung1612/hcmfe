@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { socket } from './socket';
 
 function PlayerView() {
-  const [step, setStep] = useState('login'); // login, lobby, alive, dead
+  const [step, setStep] = useState('login');
   const [playerName, setPlayerName] = useState('');
   
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -10,7 +10,10 @@ function PlayerView() {
   const [streak, setStreak] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [isRevivalLocked, setIsRevivalLocked] = useState(false);
-  const [submittedAnonymous, setSubmittedAnonymous] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
+  const [winners, setWinners] = useState([]);
+  const [myName, setMyName] = useState('');
 
   useEffect(() => {
     socket.on('joined_success', (data) => {
@@ -28,7 +31,6 @@ function PlayerView() {
     socket.on('you_are_dead', () => {
       setStep('dead');
       setFeedback(null);
-      setCurrentQuestion(null);
     });
 
     socket.on('revival_locked_status', ({ isLocked }) => {
@@ -39,7 +41,7 @@ function PlayerView() {
       setCurrentQuestion(questionData);
       setTimeLeft(timeLimit);
       setFeedback(null);
-      setSubmittedAnonymous(false);
+      setSelectedAnswer(null);
     });
 
     socket.on('answer_result', ({ isCorrect, streak }) => {
@@ -58,17 +60,20 @@ function PlayerView() {
     });
 
     socket.on('question_timeout', () => {
-      if (!isRevivalLocked && step === 'dead') {
+      if (step === 'dead' && !isRevivalLocked) {
         setFeedback('timeout');
         setStreak(0);
-      } else if (isRevivalLocked && !submittedAnonymous) {
-        setFeedback('timeout');
       }
     });
 
     socket.on('host_disconnected', () => {
       alert("Host đã thoát game. Trò chơi kết thúc!");
       window.location.reload();
+    });
+
+    socket.on('game_over', ({ winners: w }) => {
+      setWinners(w);
+      setGameOver(true);
     });
 
     return () => {
@@ -80,30 +85,51 @@ function PlayerView() {
       socket.off('new_question');
       socket.off('answer_result');
       socket.off('you_are_revived');
-      socket.off('answer_submitted_anonymous');
       socket.off('question_timeout');
       socket.off('host_disconnected');
+      socket.off('game_over');
     };
-  }, [step, isRevivalLocked, submittedAnonymous]);
-
-  useEffect(() => {
-    let timer;
-    if (timeLeft > 0) {
-      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [timeLeft]);
+  }, [step, isRevivalLocked]);
 
   const joinRoom = () => {
     if (playerName) {
+      setMyName(playerName);
       socket.emit('join_game', { playerName });
     }
   };
 
   const submitAnswer = (answer) => {
-    if (feedback || timeLeft <= 0 || submittedAnonymous) return;
+    if (feedback || selectedAnswer || timeLeft <= 0) return;
+    setSelectedAnswer(answer);
     socket.emit('submit_answer', { answer });
   };
+
+  if (gameOver) {
+    const isWinner = winners.includes(myName);
+    const nobodyWins = winners.length === 0;
+
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isWinner ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'linear-gradient(135deg, #374151 0%, #111827 100%)' }}>
+        <div style={{ background: 'white', borderRadius: '24px', padding: '60px 40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxWidth: '500px', width: '90%' }}>
+          <div style={{ fontSize: '80px', marginBottom: '20px' }}>{isWinner ? '🏆' : '💀'}</div>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1f2937', marginBottom: '10px' }}>
+            {nobodyWins ? 'KHÔNG CÓ AI CHIẾN THẮNG!' : isWinner ? 'BẠN ĐÃ THẮNG!' : 'TRÒ CHƠI KẾT THÚC'}
+          </h1>
+          <p style={{ color: '#6b7280', marginBottom: '20px' }}>
+            {nobodyWins ? 'Tất cả người chơi đã bị loại.' : isWinner ? '🎉 Chúc mừng! Bạn là người chiến thắng!' : 'Người chiến thắng:'}
+          </p>
+          {winners.map((name, i) => (
+            <div key={i} style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: 'white', borderRadius: '12px', padding: '12px 24px', fontSize: '22px', fontWeight: 'bold', marginBottom: '8px' }}>
+              🏅 {name}
+            </div>
+          ))}
+          <button onClick={() => window.location.href = '/'} style={{ marginTop: '30px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+            Quay về Trang Chủ
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 'login' || step === 'lobby') {
     return (
@@ -171,11 +197,13 @@ function PlayerView() {
         </div>
         
         <div className="question-data">
-          <p className="time-data">00:<span id="runing-data">{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span></p>
+          {/* Timer hiện trên màn hình Host, Player không cần hiện */}
           <div className="data-design-main">
             <div className="question-change-number">
               {isRevivalLocked ? (
                 <p>Trạng Thái: <span className="changing" style={{ color: '#4CAF50' }}>VÒNG CHUNG KẾT</span></p>
+              ) : step === 'lobby' ? (
+                <p>Trạng Thái: <span className="changing" style={{ color: '#ff9800' }}>SẢNH CHỜ</span></p>
               ) : step === 'alive' ? (
                 <p>Trạng Thái: <span className="changing" style={{ color: '#4CAF50' }}>BẠN ĐANG SỐNG</span></p>
               ) : (
@@ -183,7 +211,11 @@ function PlayerView() {
               )}
             </div>
             
-            {!currentQuestion ? (
+            {step === 'lobby' ? (
+              <div style={{ textAlign: 'center', padding: '50px 20px', color: '#555' }}>
+                <h3>Đang chờ Host bắt đầu trò chơi...</h3>
+              </div>
+            ) : !currentQuestion ? (
                <div style={{ textAlign: 'center', padding: '50px 20px', color: '#555' }}>
                   <h3>Đang chờ câu hỏi tiếp theo...</h3>
                </div>
@@ -193,40 +225,55 @@ function PlayerView() {
                   <div className="title-question">{currentQuestion.text}</div>
                 </div>
                 
+                {/* VÒNG LOẠI - ALIVE: chơi offline */}
                 {step === 'alive' && !isRevivalLocked ? (
                   <div style={{ padding: '30px', textAlign: 'center', borderRadius: '15px', border: '2px solid #4CAF50' }}>
                     <h2 style={{ color: '#4CAF50' }}>Hãy chơi Offline theo hiệu lệnh của Host!</h2>
                   </div>
-                ) : submittedAnonymous ? (
-                  <div style={{ padding: '30px', textAlign: 'center', borderRadius: '15px', border: '2px solid #2196F3' }}>
-                    <h2 style={{ color: '#2196F3' }}>Đã nộp bài! Đợi kết quả từ Host...</h2>
+
+                ) : step === 'dead' && isRevivalLocked ? (
+                  /* VÒNG CHUNG KẾT - DEAD: bị loại hoàn toàn */
+                  <div style={{ padding: '30px', textAlign: 'center', borderRadius: '15px', border: '2px solid #f44336', background: 'rgba(244,67,54,0.05)' }}>
+                    <h2 style={{ color: '#f44336' }}>💀 BẠN ĐÃ BỊ LOẠI</h2>
+                    <p style={{ color: '#888' }}>Vòng Chung Kết - Không có hồi sinh</p>
                   </div>
+
+
                 ) : feedback ? (
+                  /* Hiện kết quả */
                   <div style={{ padding: '30px', textAlign: 'center', borderRadius: '15px', border: `2px solid ${feedback === 'correct' ? '#4CAF50' : '#f44336'}` }}>
                     <h2 style={{ color: feedback === 'correct' ? '#4CAF50' : '#f44336' }}>
                       {feedback === 'correct' ? '✅ CHÍNH XÁC!' : feedback === 'wrong' ? '❌ SAI RỒI!' : '⏰ HẾT GIỜ!'}
                     </h2>
                   </div>
+
                 ) : (
                   <div className="row option-design">
-                    <div className="col-lg-6 col-md-6 col-12">
-                      <div 
-                        className="option-selected"
-                        onClick={() => submitAnswer('True')}
-                        style={{ cursor: 'pointer', textAlign: 'center' }}
-                      >
-                        True
-                      </div>
-                    </div>
-                    <div className="col-lg-6 col-md-6 col-12">
-                      <div 
-                        className="option-selected"
-                        onClick={() => submitAnswer('False')}
-                        style={{ cursor: 'pointer', textAlign: 'center' }}
-                      >
-                        False
-                      </div>
-                    </div>
+                    {['True', 'False'].map(opt => {
+                      const isSelected = selectedAnswer === opt;
+                      const isCorrect = feedback === 'correct' && isSelected;
+                      const isWrong = feedback === 'wrong' && isSelected;
+                      return (
+                        <div key={opt} className="col-lg-6 col-md-6 col-12">
+                          <div
+                            className="option-selected"
+                            onClick={() => submitAnswer(opt)}
+                            style={{
+                              cursor: selectedAnswer ? 'default' : 'pointer',
+                              textAlign: 'center',
+                              border: isCorrect ? '3px solid #4CAF50' : isWrong ? '3px solid #f44336' : isSelected ? '3px solid #2196F3' : undefined,
+                              background: isCorrect ? 'rgba(76,175,80,0.15)' : isWrong ? 'rgba(244,67,54,0.15)' : isSelected ? 'rgba(33,150,243,0.1)' : undefined,
+                              transform: isSelected ? 'scale(1.03)' : undefined,
+                              transition: '0.2s',
+                              fontWeight: isSelected ? 'bold' : undefined,
+                              fontSize: isSelected ? '20px' : undefined
+                            }}
+                          >
+                            {isCorrect ? '✅ ' : isWrong ? '❌ ' : isSelected ? '👉 ' : ''}{opt}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

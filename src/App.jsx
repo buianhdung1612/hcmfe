@@ -46,16 +46,19 @@ function Home() {
             </div>
           </div>
           <div className="main-button-data" style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-            {!hasHost && (
-              <div className="button-top-all-design" onClick={handleHostClick} style={{ cursor: 'pointer' }}>
-                <p>Tạo Phòng (Host)</p>
-              </div>
-            )}
-            <div className="button-top-all-design" onClick={() => navigate('/player')} style={{ cursor: 'pointer' }}>
-              <p>Vào Phòng (Player)</p>
+            <div className="button-top-all-design" onClick={() => navigate('/player')} style={{ cursor: 'pointer', width: '300px' }}>
+              <p>Vào Phòng</p>
             </div>
           </div>
         </div>
+      </div>
+
+      <div 
+        onClick={handleHostClick} 
+        style={{ position: 'fixed', bottom: '20px', right: '20px', opacity: 0.2, cursor: 'pointer', padding: '10px', fontSize: '14px', zIndex: 100 }}
+        title="Admin Login"
+      >
+        🔒
       </div>
     </>
   );

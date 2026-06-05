@@ -10,12 +10,23 @@ function HostView() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRevivalLocked, setIsRevivalLocked] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [winners, setWinners] = useState([]);
 
   useEffect(() => {
-    socket.emit('become_host');
+    const pwd = prompt("Nhập mật khẩu Host:");
+    if (!pwd) {
+      navigate('/');
+      return;
+    }
+    
+    socket.emit('become_host', { password: pwd });
 
-    socket.on('host_accepted', () => {
+    socket.on('host_accepted', (data) => {
       console.log('You are the host now.');
+      if (data && data.isRevivalLocked !== undefined) {
+        setIsRevivalLocked(data.isRevivalLocked);
+      }
     });
 
     socket.on('host_rejected', (msg) => {
@@ -35,22 +46,37 @@ function HostView() {
       console.log(`${playerName} đã hồi sinh!`);
     });
 
+    socket.on('revival_locked_status', ({ isLocked }) => {
+      setIsRevivalLocked(isLocked);
+    });
+
+    socket.on('question_timeout', () => {
+      setTimeLeft(0);
+    });
+
+    socket.on('timer_tick', ({ timeRemaining }) => {
+      setTimeLeft(timeRemaining);
+    });
+
+    socket.on('game_over', ({ winners: w }) => {
+      setWinners(w);
+      setGameOver(true);
+    });
+
     return () => {
       socket.off('host_accepted');
       socket.off('host_rejected');
       socket.off('player_joined');
       socket.off('player_status_updated');
       socket.off('player_revived');
+      socket.off('revival_locked_status');
+      socket.off('question_timeout');
+      socket.off('timer_tick');
+      socket.off('game_over');
     };
   }, [navigate]);
 
-  useEffect(() => {
-    let timer;
-    if (timeLeft > 0) {
-      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [timeLeft]);
+  // Removed local countdown – time synced from server via timer_tick
 
   const startGame = () => {
     socket.emit('start_game');
@@ -84,6 +110,42 @@ function HostView() {
     setIsRevivalLocked(newStatus);
     socket.emit('toggle_revival_lock', { isLocked: newStatus });
   };
+
+  const endGame = () => {
+    if (window.confirm('Kết thúc trò chơi? Người còn sống sẽ thắng!')) {
+      socket.emit('end_game');
+    }
+  };
+
+  const skipQuestion = () => {
+    socket.emit('skip_question');
+    setTimeLeft(0);
+  };
+
+  if (gameOver) {
+    const nobodyWins = winners.length === 0;
+
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <div style={{ background: 'white', borderRadius: '24px', padding: '60px 40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxWidth: '500px', width: '90%' }}>
+          <div style={{ fontSize: '80px', marginBottom: '20px' }}>{nobodyWins ? '💀' : '🏆'}</div>
+          <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1f2937', marginBottom: '10px' }}>TRÒ CHƠI KẾT THÚC!</h1>
+          <p style={{ color: '#6b7280', marginBottom: '30px', fontSize: '16px' }}>
+            {nobodyWins ? 'Tất cả người chơi đã bị loại. KHÔNG CÓ AI CHIẾN THẮNG!' : 'Người chiến thắng:'}
+          </p>
+          {winners.map((name, i) => (
+            <div key={i} style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: 'white', borderRadius: '16px', padding: '16px 24px', fontSize: '28px', fontWeight: 'bold', marginBottom: '12px' }}>
+              🏅 {name}
+            </div>
+          ))}
+          <button onClick={() => { socket.emit('end_game'); window.location.href = '/'; }} style={{ marginTop: '30px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+            Quay về Trang Chủ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
 
   if (!isGameStarted) {
     return (
@@ -156,28 +218,46 @@ function HostView() {
                 )}
               </div>
             </div>
-            <div className="button-deta-design">
-              <button className="next-data" id="next" onClick={handleNextQuestion}>
+            <div className="button-deta-design" style={{ display: 'flex', gap: '10px' }}>
+              <button className="next-data" id="next" onClick={handleNextQuestion} style={{ flex: 1 }}>
                 Chuyển câu tiếp theo
               </button>
+              {timeLeft > 0 && (
+                <button
+                  onClick={skipQuestion}
+                  title="Tua nhanh - kết thúc câu ngay"
+                  style={{ padding: '10px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '18px' }}
+                >
+                  ⏩
+                </button>
+              )}
             </div>
           </div>
 
           {/* RIGHT FLOATING SIDEBAR */}
-          <div style={{ position: 'fixed', right: '20px', top: '20px', bottom: '20px', width: '380px', background: 'rgba(255, 255, 255, 0.95)', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', backdropFilter: 'blur(10px)' }}>
+          <div style={{ position: 'fixed', right: '20px', top: '20px', bottom: '20px', width: '420px', background: 'rgba(255, 255, 255, 0.95)', borderRadius: '24px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', backdropFilter: 'blur(10px)' }}>
             
             {/* Stage Management */}
             <div>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '15px', margin: 0 }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '20px' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M4 2V22M4 4H15C16.1046 4 17 4.89543 17 6C17 7.10457 16.1046 8 15 8H4M15 8L18 10L15 12V8Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Stage Management
+                <span style={{ flex: 1 }}>Stage Management</span>
+                {isRevivalLocked && (
+                  <button
+                    onClick={endGame}
+                    title="Kết thúc trò chơi"
+                    style={{ background: '#dc2626', border: 'none', borderRadius: '8px', color: 'white', padding: '4px 12px', cursor: 'pointer', fontSize: '16px' }}
+                  >
+                    🏁
+                  </button>
+                )}
               </h3>
               
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                <div style={{ flex: 1, border: isRevivalLocked ? '1px solid #e5e7eb' : '2px solid #3b82f6', background: isRevivalLocked ? '#f9fafb' : '#eff6ff', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: isRevivalLocked ? '#6b7280' : '#1f2937', fontSize: '14px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ flex: 1, border: isRevivalLocked ? '1px solid #e5e7eb' : '2px solid #3b82f6', background: isRevivalLocked ? '#f9fafb' : '#eff6ff', borderRadius: '12px', padding: '12px 8px', textAlign: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontWeight: 'bold', color: isRevivalLocked ? '#6b7280' : '#1f2937', fontSize: '14px', whiteSpace: 'nowrap' }}>
                     {isRevivalLocked ? <span style={{ color: '#10b981' }}>✔</span> : <span style={{ width: '16px', height: '16px', background: '#3b82f6', borderRadius: '50%', color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✔</span>} 
                     Qualifying Round
                   </div>
@@ -188,8 +268,8 @@ function HostView() {
                   </div>
                 </div>
 
-                <div style={{ flex: 1, border: isRevivalLocked ? '2px solid #3b82f6' : '1px solid #e5e7eb', background: isRevivalLocked ? '#eff6ff' : '#f9fafb', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: isRevivalLocked ? '#1f2937' : '#6b7280', fontSize: '14px' }}>
+                <div style={{ flex: 1, border: isRevivalLocked ? '2px solid #3b82f6' : '1px solid #e5e7eb', background: isRevivalLocked ? '#eff6ff' : '#f9fafb', borderRadius: '12px', padding: '12px 8px', textAlign: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontWeight: 'bold', color: isRevivalLocked ? '#1f2937' : '#6b7280', fontSize: '14px', whiteSpace: 'nowrap' }}>
                     {isRevivalLocked ? <span style={{ width: '16px', height: '16px', background: '#3b82f6', borderRadius: '50%', color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✔</span> : <span>🔒</span>}
                     Final Round
                   </div>
@@ -203,9 +283,18 @@ function HostView() {
 
               <button 
                 onClick={toggleRevivalLock} 
-                style={{ width: '100%', padding: '12px', background: isRevivalLocked ? '#4b5563' : '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: '0.2s' }}
+                disabled={timeLeft > 0}
+                style={{ width: '100%', padding: '12px', background: timeLeft > 0 ? '#9ca3af' : (isRevivalLocked ? '#4b5563' : '#3b82f6'), color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '15px', cursor: timeLeft > 0 ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: '0.2s' }}
               >
                 {isRevivalLocked ? 'Deactivate Final Round' : '▶ Activate Final Round'}
+              </button>
+
+              <button
+                onClick={endGame}
+                disabled={timeLeft > 0}
+                style={{ width: '100%', padding: '12px', background: timeLeft > 0 ? '#9ca3af' : '#dc2626', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '15px', cursor: timeLeft > 0 ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: '0.2s' }}
+              >
+                🏁 Kết Thúc Trò ChƠi
               </button>
             </div>
 
@@ -243,7 +332,11 @@ function HostView() {
                       </div>
                     </div>
                     {p.status === 'Alive' && !isRevivalLocked && (
-                      <button onClick={(e) => { e.stopPropagation(); killPlayer(p.id); }} style={{ background: '#f44336', color: 'white', border: 'none', padding: '6px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', transition: '0.2s' }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); killPlayer(p.id); }}
+                        disabled={timeLeft > 0}
+                        style={{ background: timeLeft > 0 ? '#9ca3af' : '#f44336', color: 'white', border: 'none', padding: '6px 16px', borderRadius: '8px', cursor: timeLeft > 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '13px', transition: '0.2s' }}
+                      >
                         Kill
                       </button>
                     )}
